@@ -2,6 +2,8 @@ import { View, KeyboardAvoidingView, StyleSheet } from 'react-native'
 import React, { useLayoutEffect, useState } from 'react'
 import { Button, Input, Text } from 'react-native-elements'
 import { StatusBar } from 'expo-status-bar'
+import { auth } from '../firebase'
+import { icons } from '../constants'
 
 const RegisterScreen = () => {
     const [name, setName] = useState('')
@@ -10,7 +12,14 @@ const RegisterScreen = () => {
     const [imageUrl, setImageUrl] = useState('')
 
     const register = () => {
-
+        auth.createUserWithEmailAndPassword(email, password)
+        .then((authUser) => {
+            authUser.user.update({
+                displayName: name,
+                photoURL: imageUrl || icons.placeholder_image
+            })
+        })
+        .catch((error) => alert(error.message))
     }
 
     return (
