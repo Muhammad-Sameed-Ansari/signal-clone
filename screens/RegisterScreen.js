@@ -14,7 +14,7 @@ const RegisterScreen = () => {
     const register = () => {
         auth.createUserWithEmailAndPassword(email, password)
         .then((authUser) => {
-            authUser.user.update({
+            authUser.user.updateProfile({
                 displayName: name,
                 photoURL: imageUrl || icons.placeholder_image
             })
@@ -41,6 +41,7 @@ const RegisterScreen = () => {
                 <Input 
                     placeholder='Email'
                     type='email'
+                    autoCapitalize='none'
                     value={email}
                     onChangeText={(text) => setEmail(text)}
                 />
