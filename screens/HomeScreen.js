@@ -23,7 +23,14 @@ const HomeScreen = () => {
         )
 
         return unsubscribe
-    }, [])
+    }, [navigation])
+
+    const enterChat = (id, chatName) => {
+        navigation.navigate('Chat', {
+            id,
+            chatName
+        })
+    }
 
     useLayoutEffect(() => {
         navigation.setOptions({
@@ -71,7 +78,7 @@ const HomeScreen = () => {
         <SafeAreaView>
             <ScrollView style={styles.container}>
                 {chats.map(({id, data: { chatName }}) => (
-                    <CustomListItem key={id} id={id} chatName={chatName}/>
+                    <CustomListItem key={id} id={id} chatName={chatName} enterChat={enterChat}/>
                 ))}
             </ScrollView>
         </SafeAreaView>
