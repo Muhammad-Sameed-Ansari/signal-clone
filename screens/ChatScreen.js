@@ -1,13 +1,16 @@
-import { View, Text, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, StyleSheet, ScrollView, TextInput } from 'react-native'
-import React, { useLayoutEffect, useState } from 'react'
+import { View, Text, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, StyleSheet, ScrollView, TextInput, Keyboard } from 'react-native'
+import React, { useEffect, useLayoutEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { Avatar } from 'react-native-elements'
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
 import { icons } from '../constants'
 import { StatusBar } from 'expo-status-bar'
+import { db, auth } from '../firebase'
+import firebase from 'firebase/compat/app'
 
 const ChatScreen = ({ route }) => {
     const [userMessage, setUserMessage] = useState('')
+    const [messages, setMessages] = useState([])
     const navigation = useNavigation()
 
     useLayoutEffect(() => {
@@ -66,8 +69,34 @@ const ChatScreen = ({ route }) => {
         })
     }, [navigation])
 
-    const sendMessage = () => {
+    useLayoutEffect(() => {
+        const unsubscribe = db
+            .collection('chats')
+            .doc(route.params.id)
+            .collection('messages')
+            .orderBy('timestamp', 'desc')
+            .onSnapshot((snapshot) => setMessages(
+                snapshot.docs.map((doc) =>({
+                    id: doc.id,
+                    data: doc.data()
+                }))
+            ))
 
+        return unsubscribe
+    }, [route])
+
+    const sendMessage = () => {
+        Keyboard.dismiss()
+
+        db.collection('chats').doc(route.params.id).collection('messages').add({
+            timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+            message: userMessage,
+            displayName: auth.currentUser.displayName,
+            email: auth.currentUser.email,
+            photoURL: auth.currentUser.photoURL
+        })
+
+        setUserMessage('')
     }
 
     return (
@@ -80,7 +109,17 @@ const ChatScreen = ({ route }) => {
             >
                 <>
                     <ScrollView>
+                        {messages.map(({ id, data }) => (
+                            data.email === auth.currentUser.email ? (
+                                <View>
+                                    
+                                </View>
+                            ) : (
+                                <View>
 
+                                </View>
+                            )
+                        ))}
                     </ScrollView>
 
                     <View style={styles.footer}>
@@ -116,9 +155,8 @@ const styles = StyleSheet.create({
         height: 40,
         flex: 1,
         marginRight: 15,
-        // borderColor: 'transparent',
+        borderColor: 'transparent',
         backgroundColor: '#ECECEC',
-        borderWidth: 1,
         padding: 10,
         color: 'grey',
         borderRadius: 30
