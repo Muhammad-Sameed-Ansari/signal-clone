@@ -65,7 +65,7 @@ const RegisterScreen = () => {
                 onPress={register} 
                 title='Register'
             />
-            <View style={{ height: 100 }}/>
+            {/* <View style={{ height: 50 }}/> */}
         </KeyboardAvoidingView>
     )
 }

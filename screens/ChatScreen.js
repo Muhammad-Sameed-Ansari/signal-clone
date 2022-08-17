@@ -1,5 +1,5 @@
 import { View, Text, TouchableOpacity, SafeAreaView, KeyboardAvoidingView, Platform, StyleSheet, ScrollView, TextInput, Keyboard } from 'react-native'
-import React, { useEffect, useLayoutEffect, useState } from 'react'
+import React, { useLayoutEffect, useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { Avatar } from 'react-native-elements'
 import { AntDesign, FontAwesome, Ionicons } from '@expo/vector-icons'
@@ -20,10 +20,7 @@ const ChatScreen = ({ route }) => {
             headerTitleStyle: {
                 backgroundColor: 'red',
                 width: '100%',
-                headerTitleAlign: 'left',
-                alignItems: 'left'
             },
-            headerTitleAlign: 'left',
             headerTitle: () => (
                 <View
                     style={{
@@ -34,7 +31,7 @@ const ChatScreen = ({ route }) => {
                 >
                     <Avatar 
                         rounded
-                        source={ icons.placeholder_image }
+                        source={messages[0] ? { uri : messages[0].data.photoURL } : icons.placeholder_image}
                     />
                     <Text
                         style={{
@@ -48,9 +45,10 @@ const ChatScreen = ({ route }) => {
                 </View>
             ),
             headerLeft: () => (
+                 Platform.OS === 'ios' ?
                 <TouchableOpacity onPress={() => navigation.goBack()}>
                     <AntDesign name='arrowleft' size={24} color='white'/>
-                </TouchableOpacity>
+                </TouchableOpacity> : <View></View>
             ),
             headerRight: () => (
                 <View style={{
@@ -67,7 +65,7 @@ const ChatScreen = ({ route }) => {
                 </View>
             )
         })
-    }, [navigation])
+    }, [navigation, messages])
 
     useLayoutEffect(() => {
         const unsubscribe = db
@@ -108,15 +106,48 @@ const ChatScreen = ({ route }) => {
                 keyboardVerticalOffset={90}
             >
                 <>
-                    <ScrollView>
+                    <ScrollView contentContainerStyle={{ paddingTop: 15 }}>
                         {messages.map(({ id, data }) => (
                             data.email === auth.currentUser.email ? (
-                                <View>
-                                    
+                                <View key={id} style={styles.reciever}>
+                                    <Avatar 
+                                        position='absolute'
+                                        // WEB
+                                        containerStyle={{
+                                            position: 'absolute',
+                                            bottom: -15,
+                                            right: -5
+                                        }}
+                                        bottom={-15}
+                                        right={-5}
+                                        rounded
+                                        size={30}
+                                        source={{
+                                            uri: data.photoURL
+                                        }}
+                                    />
+                                    <Text style={styles.recieverText}>{data.message}</Text>
                                 </View>
                             ) : (
-                                <View>
-
+                                <View key={id} style={styles.sender}>
+                                    <Avatar 
+                                        position='absolute'
+                                        // WEB
+                                        containerStyle={{
+                                            position: 'absolute',
+                                            bottom: -15,
+                                            left: -5
+                                        }}
+                                        bottom={-15}
+                                        left={-5}
+                                        rounded
+                                        size={30}
+                                        source={{
+                                            uri: data.photoURL
+                                        }}
+                                    />
+                                    <Text style={styles.senderText}>{data.message}</Text>
+                                    <Text style={styles.senderName}>{data.displayName}</Text>
                                 </View>
                             )
                         ))}
@@ -144,6 +175,42 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
     },
+    reciever: {
+        padding: 15,
+        backgroundColor: '#ECECEC',
+        alignSelf: 'flex-end',
+        borderRadius: 20,
+        marginRight: 15,
+        marginBottom: 20,
+        maxWidth: '80%',
+        position: 'relative'
+    },
+    sender: {
+        padding: 15,
+        backgroundColor: '#2B68E6',
+        alignSelf: 'flex-start',
+        borderRadius: 20,
+        margin: 15,
+        maxWidth: '80%',
+        position: 'relative'
+    },
+    senderText: {
+        color: 'white',
+        fontWeight: '500',
+        marginLeft: 10,
+        marginBottom: 10
+    },
+    recieverText: {
+        color: 'black',
+        fontWeight: '500',
+        marginLeft: 10
+    },
+    senderName: {
+        left: 5,
+        paddingRight: 10,
+        fontSize: 10,
+        color: 'white'
+    },  
     footer: {
         flexDirection: 'row',
         alignItems: 'center',
